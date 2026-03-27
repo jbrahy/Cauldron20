@@ -25,6 +25,10 @@ chrome.storage.local.get('characterData', function (result) {
 const currentURL = window.location.href;
 const excludeRegex = /^https:\/\/www\.cauldron-vtt\.net\/adventure\/?$/;
 
+function normalizeCharacterName(name) {
+    return (name || '').trim().toLowerCase();
+}
+
 if (!excludeRegex.test(currentURL)) {
 	setTimeout(function () {
 		const urlWithJsonOutput = window.location.href + "?output=json";
@@ -80,6 +84,20 @@ if (!excludeRegex.test(currentURL)) {
 									});
 
 									break;
+								}
+							}
+
+							// Tier 2: case-insensitive + trimmed fallback (only if exact match failed)
+							if (!characterData) {
+								for (const [characterId, charData] of Object.entries(result.characters)) {
+									if (normalizeCharacterName(charData.Name) === normalizeCharacterName(playerCharacterName)) {
+										characterData = charData;
+										chrome.storage.local.set({
+											'activeCharacterId': characterId,
+											'characterData': charData
+										});
+										break;
+									}
 								}
 							}
 						}
@@ -2033,9 +2051,8 @@ function createCharacterSheet(adventureData, DM=null) {
 
 //This functions keeps check on the character's HP and updated it in the character sheet if there's a change
 function setupHPMonitoring(adventureData) {
-	if (window._hpMonitorInterval) {
-		clearInterval(window._hpMonitorInterval);
-	}
+	clearInterval(window._hpMonitorInterval);
+	window._hpMonitorInterval = null;
 
 	// Find character
 	let characterToMonitor = null;
