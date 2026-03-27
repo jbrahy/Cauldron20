@@ -248,11 +248,14 @@ function loadSelectedCharacter(characterId) {
             displayCharacterInfo(characterData);
             document.getElementById('exportButton').disabled = false;
 
-            chrome.storage.local.set({ 'activeCharacterId': characterId });
-
             chrome.storage.local.set({
+                'activeCharacterId': characterId,
                 'characterId': characterId,
                 'characterData': characterData
+            }, function() {
+                if (chrome.runtime.lastError) {
+                    console.error('[popup.js:loadSelectedCharacter] storage set failed:', chrome.runtime.lastError);
+                }
             });
         }
     });
@@ -1357,6 +1360,9 @@ function gatherSpells(data, characterData) {
         for (let i = 0; i < data.classSpells[l].spells.length; i++) {
             const spell = data.classSpells[l].spells[i];
             const definition = spell.definition;
+            if (!definition) {
+                continue;
+            }
             const activation = definition.activation;
             const duration = definition.duration;
 
@@ -1484,6 +1490,9 @@ function gatherSpells(data, characterData) {
                         // If we found the spell in warlock_mystic_arcanum
                         if (spell) {
                             const definition = spell.definition;
+                            if (!definition) {
+                                continue;
+                            }
                             const activation = definition.activation;
                             const duration = definition.duration;
 
