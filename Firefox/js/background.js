@@ -2410,7 +2410,8 @@ function getCharacterStats(characterData) {
                     totalCharisma += characterData.inventory[i].definition.grantedModifiers[0].value;
                 }
             }
-        } catch (TypeError) {
+        } catch (e) {
+            console.error("[background.js:calculateCharisma] inventory modifier check caught:", e);
             continue
         }
     }
