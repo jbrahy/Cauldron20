@@ -364,3 +364,4 @@ FodyWeavers.xsd
 # GSD planning artifacts
 .planning/
 .claude/
+.idea/
