@@ -138,7 +138,9 @@ function showDmView(buttonPressed, adventureData) {
 	try {
 		const content = document.getElementById('overlayContainer');
 		content.innerHTML = '';
-	} catch { }
+	} catch (e) {
+		console.error('[adventure.js:showDmView] caught:', e);
+	}
 
 	const overlayContainer = document.createElement('div');
 	overlayContainer.id = 'customOverlay';

@@ -2140,7 +2140,9 @@ function armourClass(characterData, stats) {
             if (item.name.toLowerCase().includes("shield") || item.notes.toLowerCase().includes("shield") || item.description.toLowerCase().includes("shield")) {
                 totalArmourClass += 2;
             }
-        } catch (TypeError) { }
+        } catch (e) {
+            console.error('[background.js:calculateAC] custom shield check caught:', e);
+        }
     }
 
     // Check for the Armoured Bonus for a fighting style
