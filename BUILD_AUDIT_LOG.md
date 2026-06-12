@@ -14,3 +14,6 @@
 - node --check clean on edited files; manifests valid JSON.
 - Staged deploy in DEPLOY_QUEUE.md (extension reload/zip; not shipped).
 - commit 14937c7. Remaining innerHTML sinks tracked. ITEM DONE.
+
+## 2026-06-12 (loop re-entry)
+- Re-read todo.pm: all 3 items marked DONE, each has BUILD_AUDIT_REPORT.md. No unchecked item. Terminal condition met — stop.
