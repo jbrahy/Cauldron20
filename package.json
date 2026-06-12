@@ -1,0 +1,8 @@
+{
+  "name": "cauldron20",
+  "private": true,
+  "description": "Cauldron20 browser extension \u2014 minimal test harness (no runtime deps).",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  }
+}

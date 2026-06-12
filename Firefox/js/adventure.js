@@ -1006,7 +1006,7 @@ function createCharacterSheet(adventureData, DM=null) {
 	overlayHeader.classList.add('panel-heading');
 	overlayHeader.id = "titleBar";
 	overlayHeader.innerHTML = `
-        ${characterData.Name} - Character ${characterHidden} <span class="glyphicon glyphicon-remove close" aria-hidden="true"></span>
+        ${escapeHtml(characterData.Name)} - Character ${characterHidden} <span class="glyphicon glyphicon-remove close" aria-hidden="true"></span>
     `;
 
 	//Close button
@@ -2153,7 +2153,7 @@ function showBio(adventureData) {
 
 	// Update header with Bio section title
 	const header = document.getElementById('titleBar');
-	header.innerHTML = `${characterData.Name} - Bio ${characterHidden} <span class="glyphicon glyphicon-remove close" aria-hidden="true"></span>`;
+	header.innerHTML = `${escapeHtml(characterData.Name)} - Bio ${characterHidden} <span class="glyphicon glyphicon-remove close" aria-hidden="true"></span>`;
 
 	// Add close button functionality
 	const closeButton = header.querySelector('.close');
@@ -2398,7 +2398,7 @@ function showActions(adventureData) {
 
 	// Update header with Actions section title
 	const header = document.getElementById('titleBar');
-	header.innerHTML = `${characterData.Name} - Actions ${characterHidden} <span class="glyphicon glyphicon-remove close" aria-hidden="true"></span>`;
+	header.innerHTML = `${escapeHtml(characterData.Name)} - Actions ${characterHidden} <span class="glyphicon glyphicon-remove close" aria-hidden="true"></span>`;
 
 	// Add close button functionality
 	const closeButton = header.querySelector('.close');
@@ -2882,7 +2882,7 @@ function showFeatures(adventureData) {
 	}
 
 	const header = document.getElementById('titleBar');
-	header.innerHTML = `${characterData.Name} - Features ${characterHidden} <span class="glyphicon glyphicon-remove close" aria-hidden="true"></span>`;
+	header.innerHTML = `${escapeHtml(characterData.Name)} - Features ${characterHidden} <span class="glyphicon glyphicon-remove close" aria-hidden="true"></span>`;
 
 	const closeButton = header.querySelector('.close');
 	closeButton.addEventListener('click', function () {
@@ -3540,7 +3540,7 @@ function showInventory(adventureData) {
 	}
 
 	const header = document.getElementById('titleBar');
-	header.innerHTML = `${characterData.Name} - Inventory ${characterHidden} <span class="glyphicon glyphicon-remove close" aria-hidden="true"></span>`;
+	header.innerHTML = `${escapeHtml(characterData.Name)} - Inventory ${characterHidden} <span class="glyphicon glyphicon-remove close" aria-hidden="true"></span>`;
 
 	const closeButton = header.querySelector('.close');
 	closeButton.addEventListener('click', function () {
@@ -3777,7 +3777,7 @@ function showSpells(adventureData) {
 	}
 
 	const header = document.getElementById('titleBar');
-	header.innerHTML = `${characterData.Name} - Spells ${characterHidden} <span class="glyphicon glyphicon-remove close" aria-hidden="true"></span>`;
+	header.innerHTML = `${escapeHtml(characterData.Name)} - Spells ${characterHidden} <span class="glyphicon glyphicon-remove close" aria-hidden="true"></span>`;
 
 	// Add close button functionality
 	const closeButton = header.querySelector('.close');
@@ -4636,7 +4636,7 @@ function showExtras(adventureData) {
 	}
 
 	const header = document.getElementById('titleBar');
-	header.innerHTML = `${characterData.Name} - Extras ${characterHidden} <span class="glyphicon glyphicon-remove close" aria-hidden="true"></span>`;
+	header.innerHTML = `${escapeHtml(characterData.Name)} - Extras ${characterHidden} <span class="glyphicon glyphicon-remove close" aria-hidden="true"></span>`;
 
 	header.querySelector('.close').addEventListener('click', function () {
 		characterSheetOverlay.remove();

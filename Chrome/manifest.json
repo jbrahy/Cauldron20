@@ -42,7 +42,7 @@
       "exclude_matches": [
         "https://www.cauldron-vtt.net/adventure"
       ],
-      "js": [ "js/adventure.js" ],
+      "js": [ "js/securityUtils.js", "js/adventure.js" ],
       "css": [ "css/characterSheet.css" ]
     }
 
