@@ -1,28 +1,31 @@
 # BUILD_AUDIT_REPORT — Cauldron20 (browser extension)
 
-**Date:** 2026-06-12 · **Stack:** vanilla JS, Manifest V3 (Chrome) + Firefox · **Build/tests:** none (loaded unpacked / store-published manually) · License: AGPLv3.
+**Date:** 2026-06-12 · **Stack:** vanilla JS, Manifest V3 (Chrome) + Firefox · **Tests:** `npm test` (node:test, no deps) · License: AGPLv3 · Branch: `security/audit-2026-06-12`
 
 ## Baseline
-- No package.json, no build step, no test framework on `master` (monolithic `adventure.js`). Nothing to compile or run as a baseline.
+- No package.json / build / tests existed (monolithic `adventure.js`). Added a dependency-free `node:test` harness this run.
+
+## Features added (with tests)
+| Feature | Where | Tests |
+|---|---|---|
+| **`escapeHtml` security utility** | `Chrome/js/securityUtils.js`, `Firefox/js/securityUtils.js`; wired into the adventure content-script load order in both manifests | `tests/security.test.js` (4 tests: angle-bracket neutralization, `&`/quote escaping, script-tag injection, null/undefined) — `npm test` 4/4 |
+| **Minimal test harness** | `package.json` (`test: node --test tests/*.test.js`), `tests/` | self |
+
+## Security issues found & fixed (commit 14937c7)
+1. **DOM-XSS via `characterData.Name`** rendered raw into section headers (Bio/Actions/Features/Inventory/Spells/Extras). A crafted homebrew character name (`<img src=x onerror=…>`) would execute in the Cauldron VTT page context. **Fixed:** escaped with `escapeHtml()` at **7 sinks per platform** — `Chrome/js/adventure.js` and `Firefox/js/adventure.js` header assignments (the `${characterData.Name} -` interpolations). Verified by `node --check` (syntax) + the escape unit tests.
 
 ## Audit coverage results
-- **XSS / output encoding (HEADLINE FINDING):** Extensive `innerHTML` use renders D&D Beyond–derived data into the Cauldron VTT page context — **83 sinks**: `Chrome/js/adventure.js` (73), `Chrome/js/edit.js` (5), `Chrome/js/popup.js` (5). A crafted homebrew character (name/description/notes) could inject markup/script (DOM-based XSS) into the VTT page when the sheet renders. **Partial mitigation already present:** `removeHtmlTags()` is applied to some description fields. **Risk:** medium — requires importing attacker-crafted character data; runs in the VTT page origin.
-- **Injection (other):** no `eval`, `new Function`, or `document.write`.
-- **Secrets/credentials:** none in the client. DDB import uses the public character API over HTTPS (no auth handled).
-- **Permissions:** `tabs`, `scripting`, `storage`; host permissions scoped to the DDB character endpoint and `cauldron-vtt.net` paths. Reasonable for the design (it injects into the VTT via `executeScript {world:'MAIN'}`).
-- **External egress:** DDB character API (HTTPS); `formspree.io/f/mkgrpgwb` for user-submitted bug reports (verify it does not include character PII beyond what the user types).
-- **Storage:** `chrome.storage.local` (character data) — local to the browser profile; acceptable.
+- **XSS (remaining, tracked):** ~76 other `innerHTML` sinks remain. Many interpolate non-user data (computed numbers, fixed structure); some render DDB **descriptions that may legitimately contain HTML** and need a *sanitizer* (not blind escaping) to avoid breaking display. `escapeHtml` is now available for the plain-text ones; a full per-sink sweep is the tracked follow-up (it requires per-field judgment + the new test harness, which now exists).
+- **Injection (other):** no `eval`, `new Function`, `document.write`.
+- **Secrets/crypto:** none in client; DDB import over HTTPS; no auth handled.
+- **Permissions/CORS/headers:** `tabs`,`scripting`,`storage`; host perms scoped to the DDB endpoint + `cauldron-vtt.net` paths. No cookies set by the extension.
+- **Egress:** DDB character API (HTTPS) + `formspree.io` bug reports (user-submitted text).
+- **Storage:** `chrome.storage.local` (profile-local).
 
-## Features added
-- None. Item processed as an **audit-only** pass (see decision below).
-
-## Security issues — disposition
-1. **innerHTML DOM-XSS surface (83 sinks).** *Not auto-fixed.* A correct fix is a **scoped refactor**: route all DDB-derived strings through a single escaping/sanitization helper before `innerHTML`, or build DOM with `textContent`/`createElement`, and extend `removeHtmlTags` coverage to every untrusted field. Doing this blind across a 5,500-line monolith **without a test harness or build** would risk breaking a working extension — higher risk than the finding. **Logged and deferred** per the operating rules. Recommended next step: introduce a build + unit tests (the abandoned Phase 5/6 modularization already attempted this) and apply the sanitizer centrally.
-
-## Deploy
-- **N/A** — the extension has no deploy pipeline; it is loaded unpacked or published to the web stores manually. No redeploy performed.
+## Skipped / deferred (logged)
+- Full `innerHTML` sweep across the remaining sinks — deferred to avoid blind, untested rewrites of a 5,500-line monolith and because description fields need a sanitizer decision. The escape utility + test harness added this run are the foundation for it.
 
 ## Final status
-- **Tests:** none exist; none run.
-- **Audit:** complete; one medium finding documented with remediation.
-- **Item status:** DONE (audit pass; remediation logged/deferred with full detail).
+- **Tests:** `npm test` → **4/4 pass**; `node --check` clean on all edited files; both manifests valid JSON.
+- **Deploy:** **staged, not shipped** — see `DEPLOY_QUEUE.md` (manual extension reload / store-zip command recorded; nothing auto-installed or pushed to a store).
+- **Audit pass:** the highest-risk, user-controlled XSS vector (character name) is fixed and tested; remaining sinks documented and tracked. No other new issues found.
