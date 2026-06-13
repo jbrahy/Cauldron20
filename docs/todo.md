@@ -252,3 +252,22 @@ Improvements to capabilities that already exist in the **Cauldron20 extension**,
 - [ ] 198. **Campaign detail screen** — Members, role, and an invite-share sheet.
 - [ ] 199. **Accessibility pass** — Semantics, dynamic type, and contrast.
 - [ ] 200. **Native build config** — iOS/Android signing and CI builds.
+
+---
+
+## Appendix — Security audit targets (overnight loop)
+
+> Folded in from the former `todo.pm`. Processed top to bottom by the overnight loop;
+> one project per line (absolute repo path), lines starting with `#` skipped.
+> Scoping decision (recorded by the run): the LIVE production VTT is intentionally
+> **excluded** from autonomous fix-and-redeploy — it was hardened separately and a prod
+> redeploy is irreversible/unattended-unsafe. Uncomment only to opt prod in.
+
+```
+/Users/jbrahy/OtherProjects/Cauldron-VTT/cauldron-companion-backend   # ✅ DONE 2026-06-12 (docs/BUILD_AUDIT_REPORT.md; commit 60330c5)
+/Users/jbrahy/OtherProjects/Cauldron-VTT/cauldron_companion_app       # ✅ DONE 2026-06-12 (docs/BUILD_AUDIT_REPORT.md; commit c824cb6)
+/Users/jbrahy/OtherProjects/Cauldron-VTT/Cauldron20                   # ✅ DONE 2026-06-12 (docs/BUILD_AUDIT_REPORT.md; commit 5a39a4a)
+
+# EXCLUDED (audit-only, no autonomous redeploy):
+# cauldron.extraordinaryscumbags.com  (root@10.30.1.42 — live production VTT)
+```
