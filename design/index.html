@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cauldron — Stories worth telling, told together</title>
+<meta name="description" content="Cauldron is a free, open-source virtual tabletop for tales worth telling. Light the map, roll the dice, and let the story unfold from anywhere your players wander." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%E2%9A%97%3C/text%3E%3C/svg%3E" />
+<noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --parchment:#f3ead3;
+    --parchment-2:#efe4c7;
+    --parchment-deep:#e7d9b6;
+    --ink:#2a2017;
+    --ink-soft:#5b4c39;
+    --ink-faint:#8b7a5e;
+    --gold:#a9802f;
+    --gold-bright:#c6992f;
+    --rubric:#9c3a2c;
+    --rule:rgba(74,57,33,.16);
+    --rule-strong:rgba(74,57,33,.32);
+    --leaf-max:1180px;
+    --serif:"EB Garamond",Georgia,serif;
+    --display:"Cormorant Garamond","EB Garamond",Georgia,serif;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--serif);
+    color:var(--ink);
+    background:var(--parchment);
+    line-height:1.62;
+    font-size:18px;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  /* ---- Parchment atmosphere: ruling, grain, vignette ---- */
+  body::before{ /* faint manuscript ruling + grain */
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      repeating-linear-gradient(to bottom, transparent 0 31px, var(--rule) 31px 32px),
+      radial-gradient(120% 80% at 50% -10%, rgba(255,250,235,.7), transparent 60%),
+      radial-gradient(140% 120% at 50% 120%, rgba(120,90,40,.10), transparent 55%);
+    background-blend-mode:multiply,screen,multiply;
+    opacity:.55;
+    mask-image:linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent);
+  }
+  body::after{ /* grain + edge vignette */
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity:.05;mix-blend-mode:multiply;
+    box-shadow:inset 0 0 240px rgba(60,42,18,.28);
+  }
+
+  .leaf{position:relative;z-index:1;max-width:var(--leaf-max);margin:0 auto;padding:0 clamp(20px,5vw,64px)}
+  /* codex gutter — faint vertical rule down the spine */
+  .gutter{position:fixed;top:0;bottom:0;left:50%;width:1px;z-index:0;pointer-events:none;
+    background:linear-gradient(to bottom,transparent,var(--rule-strong) 12%,var(--rule-strong) 88%,transparent);opacity:.5}
+
+  a{color:inherit;text-decoration:none}
+
+  .eyebrow{
+    font-variant:small-caps;letter-spacing:.34em;text-transform:lowercase;
+    font-size:.74rem;color:var(--gold);font-weight:600;
+  }
+  .rubric{color:var(--rubric)}
+  .mani{font-style:normal;color:var(--rubric);display:inline-block}
+
+  /* ============ HEADER ============ */
+  header.masthead{position:relative;z-index:2}
+  .masthead .bar{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
+    padding:30px 0 22px;border-bottom:1.5px double var(--rule-strong);
+  }
+  .wordmark{display:flex;align-items:center;gap:14px;line-height:1}
+  .wordmark .glyph{
+    width:38px;height:38px;flex:0 0 38px;border:1.5px solid var(--gold);border-radius:50%;
+    display:grid;place-items:center;color:var(--gold-bright);font-size:20px;
+    box-shadow:inset 0 0 0 3px rgba(169,128,47,.18);
+  }
+  .wordmark b{font-family:var(--display);font-weight:600;font-size:clamp(1.05rem,2.1vw,1.46rem);line-height:1.06;letter-spacing:.045em;text-transform:uppercase;max-width:30ch}
+  .wordmark small{display:block;font-variant:small-caps;letter-spacing:.24em;font-size:.62rem;color:var(--ink-faint);margin-top:3px}
+  nav.top{display:flex;align-items:center;gap:30px}
+  nav.top a{font-variant:small-caps;letter-spacing:.12em;font-size:.96rem;color:var(--ink-soft);position:relative;padding-bottom:3px;transition:color .25s}
+  nav.top a::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:1px;background:var(--gold);transition:right .3s ease}
+  nav.top a:hover{color:var(--ink)}
+  nav.top a:hover::after{right:0}
+  nav.top a.enter{color:var(--ink);border:1px solid var(--gold);border-radius:2px;padding:7px 16px;background:linear-gradient(#fbf4df,#f0e3c0);box-shadow:0 1px 0 rgba(169,128,47,.4)}
+  nav.top a.enter::after{display:none}
+  nav.top a.enter:hover{background:linear-gradient(#fff8e8,#ecdcb2)}
+
+  .folio{font-variant:small-caps;letter-spacing:.22em;font-size:.66rem;color:var(--ink-faint);text-align:right;padding:10px 0 0}
+
+  /* ============ HERO ============ */
+  .hero{display:grid;grid-template-columns:300px 1fr;gap:clamp(28px,5vw,72px);align-items:center;padding:clamp(40px,7vw,86px) 0 clamp(34px,5vw,60px)}
+  .versal{position:relative;aspect-ratio:1;border:2px solid var(--gold);background:
+      radial-gradient(120% 120% at 30% 20%, #fbf3da, #ecdcb4);
+    display:grid;place-items:center;box-shadow:0 2px 0 rgba(169,128,47,.35), inset 0 0 0 6px rgba(255,255,255,.35), inset 0 0 0 7px rgba(169,128,47,.5)}
+  /* dark gold-framed plaque variant for the painted emblem */
+  .versal.emblem-box{background:radial-gradient(120% 120% at 50% 32%, #241a10, #0e0a05 72%);
+    box-shadow:0 2px 0 rgba(169,128,47,.35), inset 0 0 0 6px rgba(14,10,5,.7), inset 0 0 0 7px rgba(169,128,47,.6), inset 0 0 46px rgba(0,0,0,.55)}
+  .emblem{display:block;max-width:96%;max-height:96%;width:auto;height:auto;
+    filter:drop-shadow(0 3px 6px rgba(0,0,0,.5))}
+  .versal::before,.versal::after{content:"❧";position:absolute;color:var(--gold);font-size:26px;opacity:.85}
+  .versal::before{top:8px;left:10px;transform:rotate(0deg)}
+  .versal::after{bottom:6px;right:10px;transform:rotate(180deg)}
+  .versal .cap{font-family:var(--display);font-weight:700;font-size:11rem;line-height:1;color:var(--rubric);
+    text-shadow:2px 2px 0 rgba(169,128,47,.35);transform:translateY(-.04em)}
+  .versal .sigil-lg{width:84%;height:auto;display:block}
+  .versal .corner{position:absolute;width:18px;height:18px;border:2px solid var(--gold)}
+  .versal .c1{top:6px;left:6px;border-right:0;border-bottom:0}
+  .versal .c2{top:6px;right:6px;border-left:0;border-bottom:0}
+  .versal .c3{bottom:6px;left:6px;border-right:0;border-top:0}
+  .versal .c4{bottom:6px;right:6px;border-left:0;border-top:0}
+
+  .hero-body h1{font-family:var(--display);font-weight:600;font-size:clamp(2.9rem,6.4vw,5rem);line-height:1.02;letter-spacing:.005em;margin:14px 0 18px}
+  .hero-body h1 .br{display:block}
+  .hero-body h1 em{font-style:italic;color:var(--gold);font-weight:500}
+  .hero-body .lede{font-size:1.24rem;color:var(--ink-soft);max-width:46ch;line-height:1.55}
+  .actions{display:flex;flex-wrap:wrap;align-items:center;gap:18px 24px;margin:30px 0 22px}
+  .btn{font-variant:small-caps;letter-spacing:.1em;font-size:1.02rem;padding:13px 26px;border-radius:2px;border:1px solid var(--gold);
+    background:linear-gradient(#c6992f,#a9802f);color:#fbf4df;box-shadow:0 2px 0 rgba(120,88,30,.5), inset 0 1px 0 rgba(255,255,255,.35);transition:transform .2s, box-shadow .2s, filter .2s}
+  .btn:hover{filter:brightness(1.06);transform:translateY(-1px);box-shadow:0 4px 0 rgba(120,88,30,.45)}
+  .link-mani{font-variant:small-caps;letter-spacing:.08em;color:var(--ink-soft);transition:color .25s}
+  .link-mani .mani{margin-right:8px;transition:transform .25s}
+  .link-mani:hover{color:var(--ink)}
+  .link-mani:hover .mani{transform:translateX(5px)}
+  .nb{font-size:.96rem;color:var(--ink-faint)}
+  .nb .mani{margin-right:8px}
+
+  /* ============ FLEURON DIVIDER ============ */
+  .fleuron{display:flex;align-items:center;gap:22px;color:var(--gold);justify-content:center;padding:18px 0 6px;font-size:1.4rem}
+  .fleuron::before,.fleuron::after{content:"";height:1px;flex:1;max-width:220px;background:linear-gradient(to right,transparent,var(--rule-strong),transparent)}
+
+  /* ============ SECTION HEADS ============ */
+  .sec-head{padding-top:18px}
+  .sec-head h2{font-family:var(--display);font-weight:600;font-size:clamp(2rem,4.4vw,3.2rem);line-height:1.06;max-width:18ch;margin-top:8px}
+  .sec-head h2 em{font-style:italic;color:var(--gold)}
+
+  /* ============ THE CRAFT — three articles ============ */
+  #craft{padding:18px 0 40px}
+  .articles{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:42px;border-top:1px solid var(--rule)}
+  .articles article{position:relative;padding:34px 30px 30px;border-bottom:1px solid var(--rule)}
+  .articles article:not(:last-child){border-right:1px solid var(--rule)}
+  .articles .num{font-family:var(--display);font-style:italic;font-size:2.6rem;color:var(--gold);line-height:1;position:absolute;top:24px;left:30px}
+  .articles .capit{display:block;font-variant:small-caps;letter-spacing:.22em;font-size:.66rem;color:var(--ink-faint);margin:0 0 6px 56px}
+  .articles h3{font-family:var(--display);font-weight:600;font-size:1.55rem;margin:0 0 10px 56px;line-height:1.1}
+  .articles p{color:var(--ink-soft);font-size:1.02rem;line-height:1.5}
+  .articles article{transition:background .3s}
+  .articles article:hover{background:linear-gradient(180deg,rgba(255,250,235,.6),rgba(231,217,182,.25))}
+
+  /* ============ THE MARKET — adventures ============ */
+  #market{padding:30px 0 44px}
+  .market-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+  .shelf-link{font-variant:small-caps;letter-spacing:.08em;color:var(--ink-soft);transition:color .25s;align-self:flex-end;margin-bottom:6px}
+  .shelf-link .mani{margin-right:8px;transition:transform .25s}
+  .shelf-link:hover{color:var(--ink)} .shelf-link:hover .mani{transform:translateX(5px)}
+  .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:28px;margin-top:40px}
+  .tome{position:relative;border:1px solid var(--rule-strong);background:linear-gradient(180deg,#f7eed6,#ece0c0);
+    padding:34px 32px 26px;box-shadow:6px 6px 0 rgba(120,90,40,.12);transition:transform .25s, box-shadow .25s}
+  .tome::before{content:"";position:absolute;inset:6px;border:1px solid var(--rule);pointer-events:none}
+  .tome:hover{transform:translateY(-4px);box-shadow:10px 12px 0 rgba(120,90,40,.16)}
+  .seal{position:absolute;top:-13px;right:24px;width:54px;height:54px;border-radius:50%;
+    background:radial-gradient(circle at 38% 32%,#b8453a,#8c3024);color:#f5e6c8;display:grid;place-items:center;
+    font-variant:small-caps;letter-spacing:.12em;font-size:.56rem;font-weight:600;
+    box-shadow:0 3px 6px rgba(80,24,16,.4), inset 0 0 0 2px rgba(255,255,255,.18), inset 0 0 0 4px rgba(120,30,20,.5);
+    transform:rotate(-8deg)}
+  .tome .tier{font-variant:small-caps;letter-spacing:.22em;font-size:.68rem;color:var(--gold)}
+  .tome h4{font-family:var(--display);font-weight:600;font-size:1.85rem;line-height:1.05;margin:8px 0 12px}
+  .tome p{color:var(--ink-soft);font-size:1.04rem;line-height:1.5;min-height:3em}
+  .tome .within{margin-top:18px;padding-top:14px;border-top:1px solid var(--rule);
+    font-variant:small-caps;letter-spacing:.14em;font-size:.72rem;color:var(--ink-faint)}
+
+  /* ============ COLOPHON ============ */
+  .colophon{text-align:center;padding:30px 0 70px}
+  .colophon .eyebrow{display:block;margin-bottom:22px}
+  .colophon blockquote{font-family:var(--display);font-style:italic;font-weight:500;
+    font-size:clamp(1.9rem,4.4vw,3.1rem);line-height:1.18;max-width:18ch;margin:0 auto;color:var(--ink)}
+  .colophon blockquote .rubric{font-style:italic}
+  .colophon .actions{justify-content:center;margin-top:34px}
+  .gathered{font-family:var(--display);font-style:italic;color:var(--ink-faint);font-size:1.2rem;margin-top:34px}
+
+  /* ============ FOOTER ============ */
+  footer.contentinfo{position:relative;z-index:2;border-top:1.5px double var(--rule-strong);margin-top:10px}
+  .footrow{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:26px 0}
+  .footrow .brand{font-variant:small-caps;letter-spacing:.14em;font-size:.82rem;color:var(--ink-soft)}
+  .footrow nav{display:flex;gap:24px;flex-wrap:wrap}
+  .footrow nav a{font-variant:small-caps;letter-spacing:.1em;font-size:.86rem;color:var(--ink-soft);transition:color .25s}
+  .footrow nav a:hover{color:var(--gold)}
+  .footrow .oss{font-variant:small-caps;letter-spacing:.14em;font-size:.74rem;color:var(--ink-faint)}
+
+  /* ============ MOTION ============ */
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .rise{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
+  .d1{animation-delay:.05s}.d2{animation-delay:.18s}.d3{animation-delay:.31s}.d4{animation-delay:.44s}.d5{animation-delay:.57s}
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){
+    .rise,.reveal{animation:none!important;opacity:1!important;transform:none!important;transition:none!important}
+    html{scroll-behavior:auto}
+  }
+
+  /* ============ LEAGUE OF EXTRAORDINARY SCUMBAGS ============ */
+  .league-defs{position:absolute;width:0;height:0;overflow:hidden}
+  .wordmark .glyph svg{width:26px;height:26px;display:block}
+  /* hero guild ribbon */
+  .guild-ribbon{display:inline-flex;align-items:center;gap:13px;margin-top:8px;
+    padding:9px 16px 9px 13px;border:1px solid var(--rule-strong);border-radius:2px;
+    background:linear-gradient(#f8efd6,#efe2c0);box-shadow:2px 2px 0 rgba(120,90,40,.1)}
+  .guild-ribbon .rib-mark{height:34px;width:auto;flex:0 0 auto;border:1px solid var(--rule);background:#0e0a05;padding:2px;border-radius:2px}
+  .guild-ribbon span{font-variant:small-caps;letter-spacing:.08em;font-size:.84rem;color:var(--ink-soft)}
+  .guild-ribbon b{color:var(--ink);font-weight:600}
+  /* colophon seal */
+  .league-seal{width:clamp(140px,21vw,176px);height:auto;display:block;margin:0 auto 14px;
+    filter:drop-shadow(2px 3px 2px rgba(80,56,20,.18))}
+  .seal-motto{font-family:var(--display);font-style:italic;color:var(--ink-soft);font-size:1.06rem;margin-bottom:30px}
+  .seal-motto em{color:var(--rubric);font-style:italic}
+  /* footer mark */
+  .foot-mark{height:30px;width:auto;flex:0 0 auto;margin-right:10px}
+  .footrow .brand{display:inline-flex;align-items:center}
+  .foot-credit{padding:14px 0 26px;font-size:.82rem;line-height:1.5;color:var(--ink-faint);
+    text-align:center;max-width:70ch;margin:0 auto;border-top:1px solid var(--rule)}
+  .foot-credit a{color:var(--ink-soft);border-bottom:1px solid var(--rule-strong)}
+  .foot-credit a:hover{color:var(--gold)}
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:860px){
+    .hero{grid-template-columns:1fr;gap:30px}
+    .versal{max-width:220px}
+    .versal .cap{font-size:8.5rem}
+    .articles{grid-template-columns:1fr}
+    .articles article:not(:last-child){border-right:0}
+    .cards{grid-template-columns:1fr}
+    .gutter{display:none}
+    nav.top{display:none}
+  }
+  @media (max-width:520px){
+    body{font-size:17px}
+    .masthead .bar{flex-direction:column;align-items:flex-start;gap:10px}
+  }
+</style>
+</head>
+<body>
+<div class="gutter" aria-hidden="true"></div>
+
+
+<article class="leaf">
+  <!-- ============ MASTHEAD ============ -->
+  <header class="masthead">
+    <div class="bar rise d1">
+      <a class="wordmark" href="#" aria-label="League of Extraordinary Scumbags — a Cauldron table">
+        <span><b>League of Extraordinary Scumbags</b><small>ex libris · a Cauldron table</small></span>
+      </a>
+      <nav class="top" aria-label="Primary">
+        <a href="#craft">The Craft</a>
+        <a href="#market">Adventures</a>
+        <a href="#">Manual</a>
+        <a class="enter" href="#">Enter&nbsp;<span class="mani">☞</span></a>
+      </nav>
+    </div>
+    <div class="folio rise d2">fol. j · recto</div>
+  </header>
+
+  <!-- ============ HERO / INCIPIT ============ -->
+  <section class="hero">
+    <div class="versal emblem-box rise d2">
+      <span class="corner c1"></span><span class="corner c2"></span>
+      <span class="corner c3"></span><span class="corner c4"></span>
+      <img class="emblem" src="assets/league-logo.png" width="542" height="720"
+           alt="Crest of the League of Extraordinary Scumbags — three skulls over a downturned sword, crossed maces and a twenty-sided die on a crimson lozenge" />
+    </div>
+    <div class="hero-body">
+      <span class="eyebrow rise d2">Incipit · here begins the tabletop</span>
+      <h1 class="rise d3"><span class="br">Gather the party.</span><em>Brew the tale.</em></h1>
+      <p class="lede rise d4">A virtual tabletop for tales worth telling — light the map, roll the dice, and let the story unfold from anywhere your players wander.</p>
+      <div class="actions rise d5">
+        <a class="btn" href="#">Enter the Cauldron</a>
+        <a class="link-mani" href="#craft"><span class="mani">☞</span>read on</a>
+      </div>
+      <p class="nb rise d5"><span class="mani">☞</span><em class="rubric">nota bene:</em> free &amp; open source, in perpetuity.</p>
+      <p class="guild-ribbon rise d5">
+        <img class="rib-mark" src="assets/league-logo.png" alt="" aria-hidden="true" />
+        <span>An instance of Cauldron, kept by the <b>League of Extraordinary Scumbags</b></span>
+      </p>
+    </div>
+  </section>
+
+  <div class="fleuron reveal" aria-hidden="true">❦</div>
+
+  <!-- ============ THE CRAFT ============ -->
+  <section id="craft">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Of the craft</span>
+      <h2>All that a table requires, set down in <em>three articles</em>.</h2>
+    </div>
+    <div class="articles">
+      <article class="reveal">
+        <span class="num">i.</span>
+        <span class="capit">Capit. I</span>
+        <h3>Of any rule system</h3>
+        <p>Generic dice mechanics that yield to your game — with combat set in stone for D&amp;D 5e, Pathfinder 2e and Cyberpunk Red.</p>
+      </article>
+      <article class="reveal d1">
+        <span class="num">ij.</span>
+        <span class="capit">Capit. II</span>
+        <h3>Of plainness &amp; ease</h3>
+        <p>A quiet table that keeps from your way. No clutter, no study required — though a fine manual waits for the curious.</p>
+      </article>
+      <article class="reveal d2">
+        <span class="num">iij.</span>
+        <span class="capit">Capit. III</span>
+        <h3>Of freedom, freely given</h3>
+        <p>Permanently free and open source. Copy it, fork it, scrawl in its margins — the craft belongs to all who sit at the table.</p>
+      </article>
+    </div>
+  </section>
+
+  <div class="folio reveal">fol. ij · verso</div>
+
+  <!-- ============ THE MARKET ============ -->
+  <section id="market">
+    <div class="market-head reveal">
+      <div class="sec-head">
+        <span class="eyebrow">From the market</span>
+        <h2>Adventures, bound &amp; ready to light.</h2>
+      </div>
+      <a class="shelf-link" href="#"><span class="mani">☞</span>the whole shelf</a>
+    </div>
+    <div class="cards">
+      <article class="tome reveal">
+        <span class="seal" aria-hidden="true">Sealed</span>
+        <span class="tier">Starter · lvl i–v</span>
+        <h4>Lost Mine of Phandelver</h4>
+        <p>Goblin ambush, a lost mine, a town in want of heroes. The first descent into the cauldron.</p>
+        <div class="within">maps · tokens · encounters within</div>
+      </article>
+      <article class="tome reveal d1">
+        <span class="seal" aria-hidden="true">Sealed</span>
+        <span class="tier">Campaign · lvl i–x</span>
+        <h4>Curse of Strahd</h4>
+        <p>Gothic dread settles over Barovia. Lead your party through the mists to Castle Ravenloft.</p>
+        <div class="within">maps · tokens · encounters within</div>
+      </article>
+    </div>
+  </section>
+
+  <div class="fleuron reveal" aria-hidden="true">❦</div>
+
+  <!-- ============ COLOPHON ============ -->
+  <section class="colophon">
+    <svg class="league-seal reveal" viewBox="0 0 200 200" role="img" aria-label="Seal of the League of Extraordinary Scumbags — Astu non vi, by cunning not by force">
+      <defs>
+        <path id="lxSealTop" d="M27 100 A73 73 0 0 1 173 100"/>
+        <path id="lxSealBot" d="M173 100 A73 73 0 0 1 27 100"/>
+        <clipPath id="lxSealClip"><circle cx="100" cy="100" r="59"/></clipPath>
+      </defs>
+      <circle cx="100" cy="100" r="95" fill="#f3ead3"/>
+      <circle cx="100" cy="100" r="94" fill="none" stroke="#a9802f" stroke-width="1.5"/>
+      <circle cx="100" cy="100" r="88" fill="none" stroke="#a9802f" stroke-width="3"/>
+      <circle cx="100" cy="100" r="60" fill="none" stroke="#a9802f" stroke-width="2"/>
+      <g font-family="'EB Garamond',serif" font-weight="600">
+        <text font-size="12.5" letter-spacing="2.4" fill="#5b4c39">
+          <textPath href="#lxSealTop" startOffset="50%" text-anchor="middle">LEAGUE OF EXTRAORDINARY SCUMBAGS</textPath>
+        </text>
+        <text font-size="12.5" letter-spacing="3.4" fill="#9c3a2c">
+          <textPath href="#lxSealBot" startOffset="50%" text-anchor="middle">✦  ASTU · NON · VI  ✦</textPath>
+        </text>
+      </g>
+      <rect x="-3.4" y="-3.4" width="6.8" height="6.8" transform="translate(20,100) rotate(45)" fill="#a9802f"/>
+      <rect x="-3.4" y="-3.4" width="6.8" height="6.8" transform="translate(180,100) rotate(45)" fill="#a9802f"/>
+      <circle cx="100" cy="100" r="60" fill="#0e0a05"/>
+      <image href="assets/league-logo.png" x="41" y="41" width="118" height="118" preserveAspectRatio="xMidYMid slice" clip-path="url(#lxSealClip)"/>
+      <circle cx="100" cy="100" r="60" fill="none" stroke="#a9802f" stroke-width="2"/>
+    </svg>
+    <p class="seal-motto reveal"><em>Astu non vi</em> — by cunning, not by force.</p>
+    <span class="eyebrow reveal">Colophon</span>
+    <blockquote class="reveal">“The best tales are <span class="rubric">brewed</span>, never bought.”</blockquote>
+    <div class="actions reveal d1">
+      <a class="btn" href="#">Create a free account</a>
+      <a class="link-mani" href="#"><span class="mani">☞</span>browse adventures</a>
+    </div>
+    <p class="gathered reveal d2">…and so the party gathered—</p>
+  </section>
+</article>
+
+<!-- ============ FOOTER ============ -->
+<footer class="contentinfo">
+  <div class="leaf footrow">
+    <span class="brand"><img class="foot-mark" src="assets/league-logo.png" alt="" aria-hidden="true" />Run by the League of Extraordinary Scumbags</span>
+    <nav aria-label="Footer">
+      <a href="#craft">Craft</a>
+      <a href="#market">Adventures</a>
+      <a href="#">Manual</a>
+      <a href="#">Source</a>
+      <a href="#">Discord</a>
+    </nav>
+    <span class="oss">Free &amp; open source · Astu non vi</span>
+  </div>
+  <div class="leaf foot-credit">
+    Built on <a href="https://www.cauldron-vtt.net/">Cauldron VTT</a> — free, open-source software (GPL-2.0) by Hugo Leisink. This is the League of Extraordinary Scumbags' own instance; all credit for the original tabletop belongs to the parent project.
+  </div>
+</footer>
+
+<script>
+  // Scroll-reveal: stagger sections into view as the codex unrolls.
+  (function(){
+    var els = document.querySelectorAll('.reveal');
+    if(!('IntersectionObserver' in window)){
+      els.forEach(function(e){e.classList.add('in')});return;
+    }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    },{threshold:.16, rootMargin:'0px 0px -8% 0px'});
+    els.forEach(function(e){io.observe(e)});
+  })();
+</script>
+</body>
+</html>
